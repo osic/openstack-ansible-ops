@@ -76,6 +76,10 @@
     - name: copy the openrc file for MaaS
       shell: cp /root/openrc /home/openrc-maas;chmod 644 /home/openrc-maas
       when: inventory_hostname in groups['utility_all']
+    - name: copy the openrc_monitoring file
+      copy:
+        src: "files/openrc_monitoring"
+        dest: "/home/openrc_monitoring"
     - name: Clone rpc-openstack MaaS
       git: repo=https://github.com/osic/reliability-rpc-openstack.git
            dest=/opt/rpc-openstack
@@ -98,10 +102,34 @@
   vars:
     commands : []
     command_plugins:
-      keystone:
+      keystone_api:
         plugin_name: "maas_output_parser.py"
         command:
           - "python /opt/telegraf/maas_output_parser.py keystone_api /opt/rpc-openstack/maas/plugins/keystone_api_local_check.py"
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      neutron_api:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py neutron_api /opt/rpc-openstack/maas/plugins/neutron_api_local_check.py"
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      nova_api:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py nova_api /opt/rpc-openstack/maas/plugins/nova_api_local_check.py"
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      glance_api:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py glance_api /opt/rpc-openstack/maas/plugins/glance_api_local_check.py"
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      cinder_api:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py cinder_api \"/opt/rpc-openstack/maas/plugins/cinder_api_local_check.py $cinder_api\""
         group: "utility_all"
         when_group: "{{ (groups['utility_all'] | length) > 0 }}"
       cinder:
