@@ -86,7 +86,13 @@
            accept_hostkey=yes
            force=yes
            recursive=no
-      when: inventory_hostname in groups['utility_all']
+      when: inventory_hostname in groups['utility_all']|union(groups['rabbitmq_all'])
+    - name: Enable Monitoring User in RabbitMQ
+      shell: "rabbitmqctl change_password monitoring {{ rabbitmq_monitoring_password }};rabbitmqctl set_user_tags monitoring monitoring"
+      when: inventory_hostname in groups['rabbitmq_all']
+    - name: Add rabbitmq monitoring password to openrc_monitoring
+      shell: "echo \"export rabbitmq_monitoring_pwd={{ rabbitmq_monitoring_password }}\" >> /home/openrc_monitoring"
+      when: inventory_hostname in groups['rabbitmq_all']
     - name: Enable and restart telegraf
       service:
         name: "telegraf"
@@ -150,5 +156,11 @@
           - "python /opt/telegraf/maxspeed_interface.py"
         group: "all"
         when_group: "{{ (groups['all'] | length) > 0 }}"
+      rabbitmq:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py rabbitmq \"/opt/rpc-openstack/maas/plugins/rabbitmq_status.py -H $rabbitmq -U monitoring -p $rabbitmq_monitoring_pwd\""
+        group: "rabbitmq_all"
+        when_group: "{{ (groups['rabbitmq_all'] | length) > 0 }}"
   vars_files:
     - vars.yml

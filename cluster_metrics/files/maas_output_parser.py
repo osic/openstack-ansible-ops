@@ -20,19 +20,25 @@ import subprocess
 
 
 def parse_output(service, command):
-    output = subprocess.check_output("/bin/bash -l -c "
-                                     "'source /home/openrc_monitoring;"
-                                     "python {}'".format(command),
-                                     shell=True,
-                                     stderr=subprocess.PIPE)
+    try:
+        output = subprocess.check_output("/bin/bash -l -c "
+                                         "'source /home/openrc_monitoring;"
+                                         "python {}'".format(command),
+                                         shell=True,
+                                         stderr=subprocess.PIPE)
+    except Exception as exception:
+        output = exception.output
     new_lines = []
     for line in output.splitlines():
-        if 'status ok' not in line:
+        if 'status ok' not in line and 'status error' not in line:
             line = line.replace('metric', service)
             line_parts = line.split(' ')
             line = '{} {}={}'.format(line_parts[0],
                                      line_parts[1],
                                      line_parts[3])
+            new_lines.append(line)
+        elif 'status error' in line:
+            line = '{} status=0,error_msg="{}"'.format(service, line)
             new_lines.append(line)
 
     return '\n'.join(new_lines)
