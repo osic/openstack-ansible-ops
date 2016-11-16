@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_MYCLUSTER",
-      "label": "MyCluster",
+      "name": "DS_METRICS",
+      "label": "Metrics",
       "description": "",
       "type": "datasource",
       "pluginId": "influxdb",
@@ -43,12 +43,15 @@
   ],
   "id": null,
   "title": "Core APIs Monitoring",
-  "tags": [],
+  "tags": [
+    "influxdb",
+    "telegraf"
+  ],
   "style": "dark",
   "timezone": "browser",
   "editable": true,
   "hideControls": false,
-  "sharedCrosshair": false,
+  "sharedCrosshair": true,
   "rows": [
     {
       "collapse": false,
@@ -58,7 +61,8 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
+          "decimals": null,
           "editable": true,
           "error": false,
           "fill": 1,
@@ -68,16 +72,20 @@
             "threshold2": null,
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
+          "hideTimeOverride": false,
           "id": 1,
           "isNew": true,
           "legend": {
-            "avg": false,
+            "alignAsTable": true,
+            "avg": true,
             "current": false,
-            "max": false,
-            "min": false,
+            "max": true,
+            "min": true,
+            "rightSide": true,
             "show": true,
+            "sideWidth": null,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 2,
@@ -93,24 +101,33 @@
           "steppedLine": false,
           "targets": [
             {
-              "alias": "Cinder API Response Time",
+              "alias": "$tag_host: Cinder API Response Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
+                },
+                {
+                  "params": [
+                    "host"
+                  ],
+                  "type": "tag"
                 }
               ],
+              "hide": false,
               "measurement": "cinder_api",
               "policy": "default",
+              "query": "SELECT mean(\"cinder_api_local_response_time\") FROM \"cinder_api\" WHERE \"host\" =~ /^$Server$/ AND $timeFilter GROUP BY time($interval), \"host\"",
+              "rawQuery": false,
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
@@ -127,23 +144,29 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Server$/"
+                }
+              ]
             },
             {
-              "alias": "Glance API Response Time",
+              "alias": "$tag_host: Glance API Response Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "glance_api",
@@ -164,23 +187,29 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Server$/"
+                }
+              ]
             },
             {
-              "alias": "Keystone API Response Time",
+              "alias": "$tag_host: Keystone API Response Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "keystone_api",
@@ -201,23 +230,29 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Server$/"
+                }
+              ]
             },
             {
-              "alias": "Neutron API Response Time",
+              "alias": "$tag_host: Neutron API Response Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_api",
@@ -238,23 +273,29 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Server$/"
+                }
+              ]
             },
             {
-              "alias": "Nova API Response Time",
+              "alias": "$tag_host: Nova API Response Time",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "nova_api",
@@ -275,10 +316,16 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Server$/"
+                }
+              ]
             }
           ],
-          "timeFrom": null,
+          "timeFrom": "1d",
           "timeShift": null,
           "title": "APIs Response Time",
           "tooltip": {
@@ -293,7 +340,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -302,7 +349,7 @@
             },
             {
               "format": "short",
-              "label": null,
+              "label": "",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -332,22 +379,22 @@
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
+          "colorBackground": true,
           "colorValue": false,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
           "gauge": {
-            "maxValue": 100,
+            "maxValue": 1,
             "minValue": 0,
             "show": false,
-            "thresholdLabels": false,
+            "thresholdLabels": true,
             "thresholdMarkers": true
           },
           "id": 13,
@@ -392,7 +439,7 @@
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
@@ -410,43 +457,48 @@
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "cinder_api_local_status"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "mean"
+                    "type": "last",
+                    "params": []
                   }
                 ]
               ],
               "tags": []
             }
           ],
-          "thresholds": "",
+          "thresholds": "0,1",
           "title": "Cinder Status",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "N/A",
-              "value": "null"
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "value": "1",
+              "op": "=",
+              "text": "UP"
             }
           ],
-          "valueName": "avg"
+          "valueName": "current"
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
+          "colorBackground": true,
           "colorValue": false,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -517,43 +569,48 @@
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "glance_api_local_status"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "mean"
+                    "type": "last",
+                    "params": []
                   }
                 ]
               ],
               "tags": []
             }
           ],
-          "thresholds": "",
+          "thresholds": "0,1",
           "title": "Glance Status",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "N/A",
-              "value": "null"
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "value": "1",
+              "op": "=",
+              "text": "UP"
             }
           ],
-          "valueName": "avg"
+          "valueName": "current"
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
+          "colorBackground": true,
           "colorValue": false,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -624,43 +681,48 @@
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "keystone_api_local_status"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "mean"
+                    "type": "last",
+                    "params": []
                   }
                 ]
               ],
               "tags": []
             }
           ],
-          "thresholds": "",
+          "thresholds": "0,1",
           "title": "Keystone Status",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "N/A",
-              "value": "null"
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "value": "1",
+              "op": "=",
+              "text": "UP"
             }
           ],
-          "valueName": "avg"
+          "valueName": "current"
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
+          "colorBackground": true,
           "colorValue": false,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -713,7 +775,7 @@
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
@@ -731,43 +793,48 @@
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "neutron_api_local_status"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "mean"
+                    "type": "last",
+                    "params": []
                   }
                 ]
               ],
               "tags": []
             }
           ],
-          "thresholds": "",
+          "thresholds": "0,1",
           "title": "Neutron Status",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "N/A",
-              "value": "null"
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "value": "1",
+              "op": "=",
+              "text": "UP"
             }
           ],
           "valueName": "avg"
         },
         {
           "cacheTimeout": null,
-          "colorBackground": false,
+          "colorBackground": true,
           "colorValue": false,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -820,7 +887,7 @@
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
@@ -838,29 +905,34 @@
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "nova_api_local_status"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "mean"
+                    "type": "last",
+                    "params": []
                   }
                 ]
               ],
               "tags": []
             }
           ],
-          "thresholds": "",
+          "thresholds": "0,1",
           "title": "Nova Status",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "N/A",
-              "value": "null"
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "value": "1",
+              "op": "=",
+              "text": "UP"
             }
           ],
           "valueName": "avg"
@@ -876,7 +948,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -889,13 +961,16 @@
           "id": 19,
           "isNew": true,
           "legend": {
+            "alignAsTable": true,
             "avg": false,
-            "current": false,
+            "current": true,
             "max": false,
             "min": false,
+            "rightSide": true,
             "show": true,
+            "sortDesc": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 2,
@@ -916,7 +991,7 @@
               "groupBy": [
                 {
                   "params": [
-                    "$interval"
+                    "auto"
                   ],
                   "type": "time"
                 },
@@ -1112,7 +1187,7 @@
           "yaxes": [
             {
               "format": "short",
-              "label": null,
+              "label": "1 == UP 0 == DOWN",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1120,7 +1195,7 @@
             },
             {
               "format": "short",
-              "label": null,
+              "label": "",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1145,7 +1220,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1253,7 +1328,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1361,7 +1436,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1471,7 +1546,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -1703,7 +1778,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1810,7 +1885,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1917,7 +1992,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2024,7 +2099,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2133,7 +2208,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -2365,7 +2440,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2473,7 +2548,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2581,7 +2656,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2688,7 +2763,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -2797,7 +2872,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -2992,7 +3067,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -3099,7 +3174,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -3206,7 +3281,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -3315,7 +3390,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -3473,7 +3548,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -3581,7 +3656,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -3691,7 +3766,7 @@
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -3923,7 +3998,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4030,7 +4105,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4137,7 +4212,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4244,7 +4319,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4353,7 +4428,7 @@
         {
           "aliasColors": {},
           "bars": true,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "fill": 1,
@@ -4542,7 +4617,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4649,7 +4724,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4757,7 +4832,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_METRICS}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -4861,21 +4936,15 @@
     }
   ],
   "time": {
-    "from": "2016-11-11T17:58:21.463Z",
-    "to": "2016-11-11T17:59:41.495Z"
+    "from": "2016-11-16T02:05:33.398Z",
+    "to": "2016-11-16T02:11:34.152Z"
   },
   "timepicker": {
     "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
+      "15s",
       "1m",
-      "5m",
       "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
+      "1h"
     ],
     "time_options": [
       "5m",
@@ -4890,14 +4959,114 @@
     ]
   },
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": "Metrics",
+          "value": "Metrics"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [
+          {
+            "text": "Metrics",
+            "value": "Metrics",
+            "selected": true
+          }
+        ],
+        "query": "influxdb",
+        "refresh": 1,
+        "regex": "Metrics",
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "datasource": "${DS_METRICS}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Server",
+        "multi": true,
+        "name": "Server",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM system WITH KEY=host",
+        "refresh": 1,
+        "regex": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "auto": true,
+        "auto_count": 100,
+        "auto_min": "30s",
+        "current": {
+          "tags": [],
+          "text": "auto",
+          "value": "$__auto_interval"
+        },
+        "datasource": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Interval",
+        "multi": false,
+        "name": "Interval",
+        "options": [
+          {
+            "selected": true,
+            "text": "auto",
+            "value": "$__auto_interval"
+          },
+          {
+            "selected": false,
+            "text": "30s",
+            "value": "30s"
+          },
+          {
+            "selected": false,
+            "text": "1m",
+            "value": "1m"
+          },
+          {
+            "selected": false,
+            "text": "2m",
+            "value": "2m"
+          },
+          {
+            "selected": false,
+            "text": "5m",
+            "value": "5m"
+          },
+          {
+            "selected": false,
+            "text": "10m",
+            "value": "10m"
+          },
+          {
+            "selected": false,
+            "text": "30m",
+            "value": "30m"
+          },
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          }
+        ],
+        "query": "30s,1m,2m,5m,10m,30m,1h",
+        "refresh": 0,
+        "type": "interval"
+      }
+    ]
   },
   "annotations": {
     "list": []
   },
   "refresh": false,
   "schemaVersion": 12,
-  "version": 1,
+  "version": 4,
   "links": [],
   "gnetId": null
 }
