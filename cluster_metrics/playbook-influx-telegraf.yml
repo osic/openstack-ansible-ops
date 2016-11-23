@@ -80,6 +80,12 @@
       copy:
         src: "files/openrc_monitoring"
         dest: "/home/openrc_monitoring"
+    - name: copy myconf file to home
+      copy:
+        src: "/root/.my.cnf"
+        dest: "/home/.my.cnf"
+    - name: change mycnf file owner
+      shell: "chown telegraf:telegraf /home/.my.cnf"
     - name: Clone rpc-openstack MaaS
       git: repo=https://github.com/osic/reliability-rpc-openstack.git
            dest=/opt/rpc-openstack
@@ -172,6 +178,12 @@
         plugin_name: "maas_output_parser.py"
         command:
           - "python /opt/telegraf/maas_output_parser.py neutron_service \"/opt/rpc-openstack/maas/plugins/neutron_service_check.py $neutron_server\""
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      galera:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py galera_service \"/opt/rpc-openstack/maas/plugins/galera_check.py $galera\""
         group: "utility_all"
         when_group: "{{ (groups['utility_all'] | length) > 0 }}"
   vars_files:
