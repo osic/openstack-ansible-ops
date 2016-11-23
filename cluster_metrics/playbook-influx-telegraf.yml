@@ -174,5 +174,11 @@
           - "python /opt/telegraf/maas_output_parser.py neutron_service \"/opt/rpc-openstack/maas/plugins/neutron_service_check.py $neutron_server\""
         group: "utility_all"
         when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      galera:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py galera_service \"/opt/rpc-openstack/maas/plugins/galera_check.py $galera\""
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
   vars_files:
     - vars.yml
