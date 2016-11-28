@@ -97,6 +97,7 @@
       copy:
         src: "/root/.my.cnf"
         dest: "/home/.my.cnf"
+        when: inventory_hostname in groups['utility_all']
     - name: change mycnf file owner
       shell: "chown telegraf:telegraf /home/.my.cnf"
     - name: Enable and restart telegraf
