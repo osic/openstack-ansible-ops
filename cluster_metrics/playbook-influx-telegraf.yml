@@ -94,12 +94,8 @@
       shell: "echo \"export rabbitmq_monitoring_pwd={{ rabbitmq_monitoring_password }}\" >> /home/openrc_monitoring"
       when: inventory_hostname in groups['rabbitmq_all']
     - name: copy myconf file to home
-      copy:
-        src: "/root/.my.cnf"
-        dest: "/home/.my.cnf"
-        when: inventory_hostname in groups['utility_all']
-    - name: change mycnf file owner
-      shell: "chown telegraf:telegraf /home/.my.cnf"
+      shell: "cp /root/.my.cnf dest: /home/.my.cnf;chown telegraf:telegraf /home/.my.cnf"
+      when: inventory_hostname in groups['utility_all']
     - name: Enable and restart telegraf
       service:
         name: "telegraf"
