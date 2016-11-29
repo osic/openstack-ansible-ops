@@ -93,6 +93,9 @@
     - name: Add rabbitmq monitoring password to openrc_monitoring
       shell: "echo \"export rabbitmq_monitoring_pwd={{ rabbitmq_monitoring_password }}\" >> /home/openrc_monitoring"
       when: inventory_hostname in groups['rabbitmq_all']
+    - name: copy myconf file to home
+      shell: "cp /root/.my.cnf /home/.my.cnf;chown telegraf:telegraf /home/.my.cnf"
+      when: inventory_hostname in groups['utility_all']
     - name: Enable and restart telegraf
       service:
         name: "telegraf"
@@ -172,6 +175,12 @@
         plugin_name: "maas_output_parser.py"
         command:
           - "python /opt/telegraf/maas_output_parser.py neutron_service \"/opt/rpc-openstack/maas/plugins/neutron_service_check.py $neutron_server\""
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      galera:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py galera_service \"/opt/rpc-openstack/maas/plugins/galera_check.py $galera\""
         group: "utility_all"
         when_group: "{{ (groups['utility_all'] | length) > 0 }}"
   vars_files:
