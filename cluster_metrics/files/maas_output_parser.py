@@ -33,6 +33,10 @@ def parse_output(service, command):
         if 'status ok' not in line and 'status error' not in line:
             line = line.replace('metric', service)
             line_parts = line.split(' ')
+            try:
+                line_parts[3] = float(line_parts[3])
+            except:
+                line_parts[3] = '"{}"'.format(line_parts[3])
             line = '{} {}={}'.format(line_parts[0],
                                      line_parts[1],
                                      line_parts[3])
