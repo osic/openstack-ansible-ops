@@ -1,8 +1,8 @@
 {
   "__inputs": [
     {
-      "name": "DS_MYCLUSTER",
-      "label": "MyCluster",
+      "name": "DS_MYDB",
+      "label": "MyDB",
       "description": "",
       "type": "datasource",
       "pluginId": "influxdb",
@@ -18,21 +18,21 @@
     },
     {
       "type": "panel",
-      "id": "text",
-      "name": "Text",
+      "id": "singlestat",
+      "name": "Singlestat",
       "version": ""
     },
     {
       "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
+      "id": "text",
+      "name": "Text",
       "version": ""
     },
     {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "3.1.1"
+      "version": "4.0.0"
     },
     {
       "type": "datasource",
@@ -47,29 +47,152 @@
   "style": "dark",
   "timezone": "browser",
   "editable": true,
-  "hideControls": false,
   "sharedCrosshair": false,
+  "hideControls": false,
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "MyDB",
+          "value": "MyDB",
+          "selected": true
+        },
+        "hide": 0,
+        "label": "Datasource",
+        "name": "Datasource",
+        "options": [],
+        "query": "influxdb",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_MYDB}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Host",
+        "multi": true,
+        "name": "Host",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM neutron_service WITH KEY=host",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": null,
+        "tagsQuery": null,
+        "type": "query"
+      },
+      {
+        "auto": true,
+        "auto_count": 100,
+        "auto_min": "30s",
+        "current": {
+          "text": "1h",
+          "value": "1h"
+        },
+        "hide": 0,
+        "label": "Interval",
+        "name": "Interval",
+        "options": [
+          {
+            "text": "auto",
+            "value": "$__auto_interval",
+            "selected": false
+          },
+          {
+            "text": "30s",
+            "value": "30s",
+            "selected": false
+          },
+          {
+            "text": "1m",
+            "value": "1m",
+            "selected": false
+          },
+          {
+            "text": "2m",
+            "value": "2m",
+            "selected": false
+          },
+          {
+            "text": "5m",
+            "value": "5m",
+            "selected": false
+          },
+          {
+            "text": "10m",
+            "value": "10m",
+            "selected": false
+          },
+          {
+            "text": "30m",
+            "value": "30m",
+            "selected": false
+          },
+          {
+            "text": "1h",
+            "value": "1h",
+            "selected": true
+          }
+        ],
+        "query": "30s,1m,2m,5m,10m,30m,1h",
+        "refresh": 2,
+        "type": "interval"
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "refresh": false,
+  "schemaVersion": 13,
+  "version": 9,
+  "links": [],
+  "gnetId": null,
   "rows": [
     {
-      "collapse": true,
-      "editable": true,
-      "height": "250px",
+      "title": "Neutron Services Status Chart",
       "panels": [
         {
           "aliasColors": {},
           "bars": false,
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "fill": 1,
-          "grid": {
-            "threshold1": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2": null,
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
+          "grid": {},
           "id": 1,
-          "isNew": true,
           "legend": {
             "avg": false,
             "current": false,
@@ -93,7 +216,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "alias": "Neutron DHCP agent",
+              "alias": "$tag_host: Neutron DHCP Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -104,9 +227,9 @@
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
@@ -117,7 +240,7 @@
                 [
                   {
                     "params": [
-                      "neutron-dhcp-agent_c4707a24-1761-415b-9af4-89955d18d468_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-dhcp-agent_status"
                     ],
                     "type": "field"
                   },
@@ -127,10 +250,16 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             },
             {
-              "alias": "Neutron L3 Agent",
+              "alias": "$tag_host: Neutron L3 Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -141,9 +270,9 @@
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
@@ -154,7 +283,7 @@
                 [
                   {
                     "params": [
-                      "neutron-l3-agent_f9cb2310-6a5b-46ec-8502-ed3491c53c59_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-l3-agent_status"
                     ],
                     "type": "field"
                   },
@@ -164,10 +293,16 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             },
             {
-              "alias": "Neutron Lbaassv2 agent",
+              "alias": "$tag_host: Neutron Lbaassv2 Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -178,9 +313,9 @@
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
@@ -191,7 +326,7 @@
                 [
                   {
                     "params": [
-                      "neutron-lbaasv2-agent_24eaee2b-776e-4cbd-a516-94c752411134_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-lbaasv2-agent_status"
                     ],
                     "type": "field"
                   },
@@ -201,10 +336,16 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             },
             {
-              "alias": "Neutron Linuxbridge Agent 1",
+              "alias": "$tag_host: Neutron Linuxbridge Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -215,9 +356,9 @@
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
@@ -228,7 +369,7 @@
                 [
                   {
                     "params": [
-                      "neutron-linuxbridge-agent_349581f9-1793-4585-b3a3-6c9471b86510_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-linuxbridge-agent_status"
                     ],
                     "type": "field"
                   },
@@ -238,47 +379,16 @@
                   }
                 ]
               ],
-              "tags": []
-            },
-            {
-              "alias": "Neutron Linuxbridge Agent 2",
-              "dsType": "influxdb",
-              "groupBy": [
+              "tags": [
                 {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
                 }
-              ],
-              "measurement": "neutron_service",
-              "policy": "default",
-              "refId": "E",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "neutron-linuxbridge-agent_b6ecd292-15b3-40dc-90fe-ed440c6d8822_on_host_jp-aio-openstack-30"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": []
+              ]
             },
             {
-              "alias": "Neutron Metadata Agent",
+              "alias": "$tag_host: Neutron Metadata Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -289,51 +399,14 @@
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
               "policy": "default",
               "refId": "F",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "neutron-metering-agent_fe4d6ce9-c6f0-4838-a640-6a5d5c6d57f1_on_host_aio1-neutron-agents-container-1fe2c6ff"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": []
-            },
-            {
-              "alias": "Neutron Metering Agent",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "neutron_service",
-              "policy": "default",
-              "refId": "G",
               "resultFormat": "time_series",
               "select": [
                 [
@@ -349,9 +422,59 @@
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_host: Neutron Metering Agent",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "host"
+                  ],
+                  "type": "tag"
+                }
+              ],
+              "measurement": "neutron_service",
+              "policy": "default",
+              "refId": "G",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "neutron-metering-agent_status"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
+          "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
           "title": "Neutron Services Status",
@@ -363,7 +486,10 @@
           },
           "type": "graph",
           "xaxis": {
-            "show": true
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
           },
           "yaxes": [
             {
@@ -371,7 +497,7 @@
               "label": "Status",
               "logBase": 2,
               "max": 1,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -380,31 +506,22 @@
               "logBase": 1,
               "max": null,
               "min": null,
-              "show": true
+              "show": false
             }
           ]
         }
       ],
       "showTitle": true,
-      "title": "Neutron Services Status Chart"
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": true
     },
     {
-      "collapse": true,
-      "editable": true,
-      "height": "250px",
+      "title": "Neutron Agents Status",
       "panels": [
-        {
-          "content": "<h1>Neutron Agents</h1>",
-          "editable": true,
-          "error": false,
-          "id": 9,
-          "isNew": true,
-          "links": [],
-          "mode": "html",
-          "span": 5,
-          "title": "",
-          "type": "text"
-        },
         {
           "cacheTimeout": null,
           "colorBackground": true,
@@ -414,7 +531,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -427,7 +544,6 @@
           },
           "id": 3,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -454,7 +570,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -463,20 +579,20 @@
           },
           "targets": [
             {
-              "alias": "Neutron L3 Agent",
+              "alias": "$tag_host: Neutron L3 Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "auto"
+                    "$interval"
                   ],
                   "type": "time"
                 },
                 {
                   "params": [
-                    "null"
+                    "host"
                   ],
-                  "type": "fill"
+                  "type": "tag"
                 }
               ],
               "measurement": "neutron_service",
@@ -487,17 +603,23 @@
                 [
                   {
                     "params": [
-                      "neutron-l3-agent_f9cb2310-6a5b-46ec-8502-ed3491c53c59_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-l3-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
@@ -527,7 +649,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -540,7 +662,6 @@
           },
           "id": 4,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -567,7 +688,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -600,17 +721,23 @@
                 [
                   {
                     "params": [
-                      "neutron-lbaasv2-agent_24eaee2b-776e-4cbd-a516-94c752411134_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-lbaasv2-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
@@ -640,7 +767,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -653,7 +780,6 @@
           },
           "id": 5,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -680,7 +806,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -689,7 +815,7 @@
           },
           "targets": [
             {
-              "alias": "Linuxbridge Agent 1",
+              "alias": "Linuxbridge Agent",
               "dsType": "influxdb",
               "groupBy": [
                 {
@@ -713,21 +839,27 @@
                 [
                   {
                     "params": [
-                      "neutron-linuxbridge-agent_349581f9-1793-4585-b3a3-6c9471b86510_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-linuxbridge-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
-          "title": "Linuxbridge Agent 1",
+          "title": "Linuxbridge Agent",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -753,120 +885,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
-          "editable": true,
-          "error": false,
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": true,
-            "thresholdMarkers": true
-          },
-          "id": 6,
-          "interval": null,
-          "isNew": true,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "span": 1,
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "targets": [
-            {
-              "alias": "Linuxbridge Agent 2",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "auto"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "neutron_service",
-              "policy": "default",
-              "refId": "A",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "neutron-linuxbridge-agent_b6ecd292-15b3-40dc-90fe-ed440c6d8822_on_host_jp-aio-openstack-30"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": []
-            }
-          ],
-          "thresholds": "0,1",
-          "title": "Linuxbridge Agent 2",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "DOWN",
-              "value": "0"
-            },
-            {
-              "op": "=",
-              "text": "UP",
-              "value": "1"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "${DS_MYDB}",
           "editable": true,
           "error": false,
           "format": "none",
@@ -879,7 +898,6 @@
           },
           "id": 2,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -906,7 +924,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -939,17 +957,23 @@
                 [
                   {
                     "params": [
-                      "neutron-dhcp-agent_c4707a24-1761-415b-9af4-89955d18d468_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-dhcp-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
@@ -979,7 +1003,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -992,7 +1016,6 @@
           },
           "id": 8,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -1019,7 +1042,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -1052,17 +1075,23 @@
                 [
                   {
                     "params": [
-                      "neutron-metering-agent_fe4d6ce9-c6f0-4838-a640-6a5d5c6d57f1_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-metering-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
@@ -1092,7 +1121,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1105,7 +1134,6 @@
           },
           "id": 7,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -1132,7 +1160,7 @@
               "to": "null"
             }
           ],
-          "span": 1,
+          "span": 2,
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
@@ -1165,17 +1193,23 @@
                 [
                   {
                     "params": [
-                      "neutron-metadata-agent_47ab2624-2dce-4a8b-a065-0feccfe7b393_on_host_aio1-neutron-agents-container-1fe2c6ff"
+                      "neutron-metadata-agent_status"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
-              "tags": []
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
             }
           ],
           "thresholds": "0,1",
@@ -1198,12 +1232,15 @@
         }
       ],
       "showTitle": true,
-      "title": "Neutron Agents Status"
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": false
     },
     {
-      "collapse": true,
-      "editable": true,
-      "height": "250px",
+      "title": "Neutron Agents General Status",
       "panels": [
         {
           "cacheTimeout": null,
@@ -1214,7 +1251,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1227,7 +1264,6 @@
           },
           "id": 10,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -1286,13 +1322,13 @@
                 [
                   {
                     "params": [
-                      "agents_alive"
+                      "services_up"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
@@ -1300,7 +1336,7 @@
             }
           ],
           "thresholds": "0,7",
-          "title": "Neutron Agents Alive",
+          "title": "Neutron Agents Up",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1321,7 +1357,7 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "datasource": "${DS_MYCLUSTER}",
+          "datasource": "$Datasource",
           "editable": true,
           "error": false,
           "format": "none",
@@ -1334,7 +1370,6 @@
           },
           "id": 11,
           "interval": null,
-          "isNew": true,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -1393,13 +1428,13 @@
                 [
                   {
                     "params": [
-                      "agents_dead"
+                      "services_down"
                     ],
                     "type": "field"
                   },
                   {
                     "params": [],
-                    "type": "mean"
+                    "type": "last"
                   }
                 ]
               ],
@@ -1421,357 +1456,340 @@
         }
       ],
       "showTitle": true,
-      "title": "Neutron Agents General Status"
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": false
     },
     {
       "title": "Nova Services Status Chart",
-      "height": "250px",
-      "editable": true,
-      "collapse": true,
       "panels": [
         {
-          "title": "Nova Services",
-          "error": false,
-          "span": 12,
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "graph",
-          "isNew": true,
+          "error": false,
+          "fill": 1,
+          "grid": {},
           "id": 12,
-          "targets": [
-            {
-              "refId": "A",
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-cert_on_host_aio1-nova-cert-container-fa70c36f_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "nova_service",
-              "alias": "nova_cert"
-            },
-            {
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-compute_on_host_jp-aio-openstack-30_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "refId": "B",
-              "measurement": "nova_service",
-              "alias": "nova_compute"
-            },
-            {
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-conductor_on_host_aio1-nova-conductor-container-ddf1efc8_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "refId": "C",
-              "measurement": "nova_service",
-              "alias": "nova_conductor"
-            },
-            {
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-consoleauth_on_host_aio1-nova-console-container-9f1e9d9a_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "refId": "D",
-              "measurement": "nova_service",
-              "alias": "nova_consoleauth"
-            },
-            {
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-scheduler_on_host_aio1-nova-scheduler-container-4230b022_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "refId": "E",
-              "measurement": "nova_service",
-              "alias": "nova_scheduler"
-            }
-          ],
-          "datasource": "${DS_MYCLUSTER}",
-          "renderer": "flot",
-          "yaxes": [
-            {
-              "label": "Status",
-              "show": true,
-              "logBase": 2,
-              "min": null,
-              "max": 1,
-              "format": "short"
-            },
-            {
-              "label": null,
-              "show": true,
-              "logBase": 1,
-              "min": null,
-              "max": null,
-              "format": "short"
-            }
-          ],
-          "xaxis": {
-            "show": true
-          },
-          "grid": {
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
           },
           "lines": true,
-          "fill": 1,
           "linewidth": 2,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false
-          },
+          "links": [],
           "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
           "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true,
-            "sort": 0,
-            "msResolution": true
-          },
+          "targets": [
+            {
+              "alias": "$tag_host: nova_cert",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-cert_status"
+                    ]
+                  },
+                  {
+                    "type": "mean",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_host: Nova Compute",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "nova-compute_status"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_host: Nova Conductor",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "C",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "nova-conductor_status"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_host: Nova Consoleauth",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "D",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "nova-consoleauth_status"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            },
+            {
+              "alias": "$tag_host: Nova Scheduler",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "E",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "nova-scheduler_status"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
+          "title": "Nova Services",
+          "tooltip": {
+            "msResolution": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "Status",
+              "logBase": 2,
+              "max": 1,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
         }
       ],
-      "showTitle": true
+      "showTitle": true,
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": false
     },
     {
       "title": "Nova Services Status",
-      "height": "250px",
-      "editable": true,
-      "collapse": true,
       "panels": [
         {
-          "title": "",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "text",
-          "isNew": true,
-          "id": 13,
-          "mode": "html",
           "content": "<h1>Nova Services </h1>",
-          "links": []
+          "editable": true,
+          "error": false,
+          "id": 13,
+          "links": [],
+          "mode": "html",
+          "span": 2,
+          "title": "",
+          "type": "text"
         },
         {
-          "title": "Nova Cert",
-          "error": false,
-          "span": 2,
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "singlestat",
-          "isNew": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
           "id": 14,
-          "targets": [
-            {
-              "refId": "A",
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-cert_on_host_aio1-nova-cert-container-fa70c36f_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "nova_service"
-            }
-          ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
           "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "DOWN"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "UP"
-            }
-          ],
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -1782,20 +1800,91 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
+          "span": 2,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-cert_status"
+                    ]
+                  },
+                  {
+                    "type": "last",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            }
+          ],
           "thresholds": "0,1",
+          "title": "Nova Cert",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "1"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
           "colorBackground": true,
           "colorValue": false,
           "colors": [
@@ -1803,87 +1892,21 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
-        },
-        {
-          "title": "Nova Compute",
-          "error": false,
-          "span": 2,
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "singlestat",
-          "isNew": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "id": 15,
-          "targets": [
-            {
-              "refId": "A",
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-compute_on_host_jp-aio-openstack-30_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "nova_service"
-            }
-          ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
           "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "DOWN"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "UP"
-            }
-          ],
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -1894,20 +1917,91 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
+          "span": 2,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-compute_status"
+                    ]
+                  },
+                  {
+                    "type": "last",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            }
+          ],
           "thresholds": "0,1",
+          "title": "Nova Compute",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "1"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
           "colorBackground": true,
           "colorValue": false,
           "colors": [
@@ -1915,87 +2009,21 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": false
-          }
-        },
-        {
-          "title": "Nova Conductor",
-          "error": false,
-          "span": 2,
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "singlestat",
-          "isNew": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
           "id": 16,
-          "targets": [
-            {
-              "refId": "A",
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-conductor_on_host_aio1-nova-conductor-container-ddf1efc8_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "nova_service"
-            }
-          ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
           "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "DOWN"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "UP"
-            }
-          ],
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -2006,20 +2034,91 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
+          "span": 2,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-conductor_status"
+                    ]
+                  },
+                  {
+                    "type": "last",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=",
+                  "value": "aio1-nova-conductor-container-83ab30cb"
+                }
+              ]
+            }
+          ],
           "thresholds": "0,1",
+          "title": "Nova Conductor",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "1"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
           "colorBackground": true,
           "colorValue": false,
           "colors": [
@@ -2027,87 +2126,21 @@
             "rgba(237, 129, 40, 0.89)",
             "rgba(50, 172, 45, 0.97)"
           ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
-        },
-        {
-          "title": "Nova Consoleauth",
-          "error": false,
-          "span": 2,
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "singlestat",
-          "isNew": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
           "id": 17,
-          "targets": [
-            {
-              "refId": "A",
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-consoleauth_on_host_aio1-nova-console-container-9f1e9d9a_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "nova_service"
-            }
-          ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
           "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "DOWN"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "UP"
-            }
-          ],
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -2118,108 +2151,113 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "0,1",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
+          "span": 2,
           "sparkline": {
-            "show": false,
+            "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
+            "show": false
           },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-consoleauth_status"
+                    ]
+                  },
+                  {
+                    "type": "last",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": "0,1",
+          "title": "Nova Consoleauth",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "1"
+            }
+          ],
+          "valueName": "current"
         },
         {
-          "title": "Nova Scheduler",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "isNew": true,
-          "id": 18,
-          "targets": [
-            {
-              "policy": "default",
-              "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
-              "groupBy": [
-                {
-                  "type": "time",
-                  "params": [
-                    "$interval"
-                  ]
-                },
-                {
-                  "type": "fill",
-                  "params": [
-                    "null"
-                  ]
-                }
-              ],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "nova-scheduler_on_host_aio1-nova-scheduler-container-4230b022_status"
-                    ]
-                  },
-                  {
-                    "type": "mean",
-                    "params": []
-                  }
-                ]
-              ],
-              "refId": "A",
-              "measurement": "nova_service"
-            }
-          ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
-          "interval": null,
           "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "1",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "0",
-              "op": "=",
-              "text": "DOWN"
-            }
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
           ],
+          "datasource": "$Datasource",
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
+          "id": 18,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -2230,79 +2268,177 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "0,1",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
+          "span": 2,
           "sparkline": {
-            "show": false,
+            "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
+            "show": false
           },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "type": "tag",
+                  "params": [
+                    "host"
+                  ]
+                }
+              ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "type": "field",
+                    "params": [
+                      "nova-scheduler_status"
+                    ]
+                  },
+                  {
+                    "type": "last",
+                    "params": []
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "host",
+                  "operator": "=~",
+                  "value": "/^$Host$/"
+                }
+              ]
+            }
+          ],
+          "thresholds": "0,1",
+          "title": "Nova Scheduler",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "1"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            }
+          ],
+          "valueName": "current"
         }
       ],
-      "showTitle": true
+      "showTitle": true,
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": false
     },
     {
       "title": "Nova Services General Status",
-      "height": "250px",
-      "editable": true,
-      "collapse": true,
       "panels": [
         {
-          "title": "Nova Services Up",
-          "error": false,
-          "span": 6,
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": "$Datasource",
           "editable": true,
-          "type": "singlestat",
-          "isNew": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
           "id": 19,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "span": 6,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
           "targets": [
             {
-              "refId": "A",
-              "policy": "default",
               "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 },
                 {
-                  "type": "fill",
                   "params": [
                     "null"
-                  ]
+                  ],
+                  "type": "fill"
                 }
               ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
               "select": [
                 [
                   {
@@ -2312,30 +2448,51 @@
                     ]
                   },
                   {
-                    "type": "mean",
+                    "type": "last",
                     "params": []
                   }
                 ]
               ],
-              "measurement": "nova_service"
+              "tags": []
             }
           ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
-          "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
+          "thresholds": "0,5",
+          "title": "Nova Services Up",
+          "type": "singlestat",
+          "valueFontSize": "80%",
           "valueMaps": [
             {
-              "value": "null",
               "op": "=",
-              "text": "N/A"
+              "text": "N/A",
+              "value": "null"
             }
           ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": true,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": "${DS_MYDB}",
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": true,
+            "thresholdMarkers": true
+          },
+          "id": 20,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
           "mappingTypes": [
             {
               "name": "value to text",
@@ -2346,70 +2503,48 @@
               "value": 2
             }
           ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
           "rangeMaps": [
             {
               "from": "null",
-              "to": "null",
-              "text": "N/A"
+              "text": "N/A",
+              "to": "null"
             }
           ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "0,5",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
+          "span": 6,
           "sparkline": {
-            "show": false,
+            "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
+            "show": false
           },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
-        },
-        {
-          "title": "Nova Services Down",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "singlestat",
-          "isNew": true,
-          "id": 20,
           "targets": [
             {
-              "refId": "A",
-              "policy": "default",
               "dsType": "influxdb",
-              "resultFormat": "time_series",
-              "tags": [],
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 },
                 {
-                  "type": "fill",
                   "params": [
                     "null"
-                  ]
+                  ],
+                  "type": "fill"
                 }
               ],
+              "measurement": "nova_service",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
               "select": [
                 [
                   {
@@ -2419,117 +2554,35 @@
                     ]
                   },
                   {
-                    "type": "mean",
+                    "type": "last",
                     "params": []
                   }
                 ]
               ],
-              "measurement": "nova_service"
+              "tags": []
             }
           ],
-          "links": [],
-          "datasource": "${DS_MYCLUSTER}",
-          "maxDataPoints": 100,
-          "interval": null,
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
+          "thresholds": "5,0",
+          "title": "Nova Services Down",
+          "type": "singlestat",
+          "valueFontSize": "80%",
           "valueMaps": [
             {
-              "value": "null",
               "op": "=",
-              "text": "N/A"
+              "text": "N/A",
+              "value": "null"
             }
           ],
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "rangeMaps": [
-            {
-              "from": "null",
-              "to": "null",
-              "text": "N/A"
-            }
-          ],
-          "mappingType": 1,
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "5,0",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "gauge": {
-            "show": false,
-            "minValue": 0,
-            "maxValue": 100,
-            "thresholdMarkers": true,
-            "thresholdLabels": true
-          }
+          "valueName": "current"
         }
       ],
-      "showTitle": true
+      "showTitle": true,
+      "titleSize": "h6",
+      "height": "250px",
+      "repeat": null,
+      "repeatRowId": null,
+      "repeatIteration": null,
+      "collapse": false
     }
-  ],
-  "time": {
-    "from": "2016-11-18T20:22:44.802Z",
-    "to": "2016-11-18T23:27:29.012Z"
-  },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
-    ]
-  },
-  "templating": {
-    "list": []
-  },
-  "annotations": {
-    "list": []
-  },
-  "refresh": false,
-  "schemaVersion": 12,
-  "version": 6,
-  "links": [],
-  "gnetId": null
+  ]
 }
