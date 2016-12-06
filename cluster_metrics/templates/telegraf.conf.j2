@@ -70,3 +70,10 @@
 
 [[inputs.swap]]
 {% endif %}
+
+{% if inventory_hostname in groups['rabbitmq_all'] %}
+[[inputs.rabbitmq]]
+  url = "http://{{ hostvars[groups['rabbitmq_all'][0]]['ansible_host'] }}:15672"
+  username = "monitoring"
+  password = "{{ rabbitmq_monitoring_password }}"
+{% endif %}
