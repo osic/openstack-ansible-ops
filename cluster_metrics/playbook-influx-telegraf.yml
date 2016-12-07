@@ -184,5 +184,17 @@
           - "python /opt/telegraf/maas_output_parser.py galera_service \"/opt/rpc-openstack/maas/plugins/galera_check.py $galera\""
         group: "utility_all"
         when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      nova_cloud_stats:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py nova_cloud_stats /opt/rpc-openstack/maas/plugins/nova_cloud_stats.py"
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
+      memcached:
+        plugin_name: "maas_output_parser.py"
+        command:
+          - "python /opt/telegraf/maas_output_parser.py memcached_status \"/opt/rpc-openstack/maas/plugins/memcached_status.py {{ hostvars[groups['memcached_all'][0]]['ansible_host'] }}\""
+        group: "utility_all"
+        when_group: "{{ (groups['utility_all'] | length) > 0 }}"
   vars_files:
     - vars.yml
