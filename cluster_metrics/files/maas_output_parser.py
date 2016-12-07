@@ -37,9 +37,17 @@ def parse_output(service, command):
                 line_parts[3] = float(line_parts[3])
             except:
                 line_parts[3] = '"{}"'.format(line_parts[3])
-            line = '{} {}={}'.format(line_parts[0],
-                                     line_parts[1],
-                                     line_parts[3])
+
+            try:
+                tags = ',{}'.format(line_parts[1].split(',')[1])
+            except IndexError:
+                tags = ''
+            finally:
+                line_parts[1] = line_parts[1].split(',')[0]
+            line = '{}{} {}={}'.format(line_parts[0],
+                                       tags,
+                                       line_parts[1],
+                                       line_parts[3])
             new_lines.append(line)
         elif 'status error' in line:
             line = '{} status=0,error_msg="{}"'.format(service, line)
